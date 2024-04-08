@@ -2,6 +2,8 @@ package product
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/shammianand/ecom/types"
 )
@@ -32,6 +34,44 @@ func (s *Store) GetProducts() ([]types.Product, error) {
 	return products, nil
 }
 
+func (s *Store) UpdateProduct(product types.Product) error {
+	_, err := s.db.Exec(
+		"UPDATE products SET name = ?, price = ?, image = ?, description = ?, quantity = ? WHERE id = ?",
+		product.Name,
+		product.Price,
+		product.Image,
+		product.Description,
+		product.Quantity,
+		product.ID,
+	)
+	return err
+}
+
+func (s *Store) GetProductsByID(productIDs []int) ([]types.Product, error) {
+	whereIdClause := strings.Repeat(",?", len(productIDs)-1)
+	query := fmt.Sprintf("SELECT * FROM products WHERE id IN (?%s);", whereIdClause)
+
+	args := make([]interface{}, len(productIDs))
+	for i, v := range productIDs {
+		args[i] = v
+	}
+	rows, err := s.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	products := []types.Product{}
+	for rows.Next() {
+		p, err := scanRowsIntoProduct(rows)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, *p)
+	}
+
+	return products, nil
+}
+
 func (s *Store) CreateProduct(product types.Product) error {
 
 	_, err := s.db.Exec(
@@ -49,7 +89,7 @@ func (s *Store) CreateProduct(product types.Product) error {
 }
 
 func scanRowsIntoProduct(rows *sql.Rows) (*types.Product, error) {
-	product := new(types.Product)
+	product := &types.Product{}
 	err := rows.Scan(
 		&product.ID,
 		&product.Name,
