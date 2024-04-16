@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/mux"
 	"github.com/shammianand/ecom/config"
 	"github.com/shammianand/ecom/service/auth"
 	"github.com/shammianand/ecom/types"
@@ -21,9 +20,9 @@ func NewHandler(store types.UserStore) *Handler {
 	return &Handler{store: store}
 }
 
-func (h *Handler) RegisterRoute(router *mux.Router) {
-	router.HandleFunc("/login", h.handleLogin).Methods("POST")
-	router.HandleFunc("/register", h.handleRegister).Methods("POST")
+func (h *Handler) RegisterRoutes(router *http.ServeMux) {
+	router.HandleFunc("POST /login", h.handleLogin)
+	router.HandleFunc("POST /register", h.handleRegister)
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {

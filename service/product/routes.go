@@ -3,7 +3,6 @@ package product
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/shammianand/ecom/types"
 	"github.com/shammianand/ecom/utils"
 )
@@ -16,9 +15,9 @@ func NewHandler(store types.ProductStore) *Handler {
 	return &Handler{store: store}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/products", h.handleCreateProduct).Methods("POST")
-	router.HandleFunc("/products", h.handleGetProducts).Methods("GET")
+func (h *Handler) RegisterRoutes(router *http.ServeMux) {
+	router.HandleFunc("POST /products", h.handleCreateProduct)
+	router.HandleFunc("GET /products", h.handleGetProducts)
 }
 
 func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {

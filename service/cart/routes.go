@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/gorilla/mux"
 	"github.com/shammianand/ecom/service/auth"
 	"github.com/shammianand/ecom/types"
 	"github.com/shammianand/ecom/utils"
@@ -20,8 +19,8 @@ func NewHandler(store types.OrderStore, productStore types.ProductStore, userSto
 	return &Handler{store: store, productStore: productStore, userStore: userStore}
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/cart/checkout", auth.WithJWTAuth(h.handleCartCheckout, h.userStore)).Methods("POST")
+func (h *Handler) RegisterRoutes(router *http.ServeMux) {
+	router.HandleFunc("POST /cart/checkout", auth.WithJWTAuth(h.handleCartCheckout, h.userStore))
 }
 
 func (h *Handler) handleCartCheckout(w http.ResponseWriter, r *http.Request) {

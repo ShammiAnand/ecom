@@ -6,7 +6,6 @@ require (
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 )
 

@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/shammianand/ecom/service/cart"
+	"github.com/shammianand/ecom/service/httphelp"
 	"github.com/shammianand/ecom/service/order"
 	"github.com/shammianand/ecom/service/product"
 	"github.com/shammianand/ecom/service/user"
+	"github.com/shammianand/ecom/utils"
 )
 
 type APIServer struct {
@@ -25,37 +25,14 @@ func NewAPIServer(addr string, db *sql.DB) *APIServer {
 	}
 }
 
-type wrappedWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (w *wrappedWriter) WriteHeader(statusCode int) {
-	w.ResponseWriter.WriteHeader(statusCode)
-	w.statusCode = statusCode
-}
-
-func Logging(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		wrapped := &wrappedWriter{
-			ResponseWriter: w,
-			statusCode:     http.StatusOK,
-		}
-		next.ServeHTTP(wrapped, r)
-		log.Println(wrapped.statusCode, r.Method, r.URL.Path, time.Since(start))
-	})
-}
-
 func (s *APIServer) Run() error {
 
-	router := mux.NewRouter()
-	router.Use(Logging)
-	subrouter := router.PathPrefix("/api/v1").Subrouter()
+	router := http.NewServeMux()
+	subrouter := httphelp.Subrouter(router, "/api/v1")
 
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
-	userHandler.RegisterRoute(subrouter)
+	userHandler.RegisterRoutes(subrouter)
 
 	productStore := product.NewStore(s.db)
 	productHandler := product.NewHandler(productStore)
@@ -67,9 +44,5 @@ func (s *APIServer) Run() error {
 	cartHandler.RegisterRoutes(subrouter)
 
 	log.Println("Listening on: ", s.addr)
-	return http.ListenAndServe(s.addr, router)
-}
-
-func main() {
-
+	return http.ListenAndServe(s.addr, utils.Logging(router))
 }
