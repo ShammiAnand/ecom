@@ -63,7 +63,6 @@ type Order struct {
 
 type ProductStore interface {
 	GetProducts() ([]Product, error)
-	CreateProduct(product Product) error
 	GetProductsByID(ps []int) ([]Product, error)
 	UpdateProduct(product Product) error
 }

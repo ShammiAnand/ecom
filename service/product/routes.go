@@ -16,36 +16,7 @@ func NewHandler(store types.ProductStore) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("POST /products", h.handleCreateProduct)
 	router.HandleFunc("GET /products", h.handleGetProducts)
-}
-
-func (h *Handler) handleCreateProduct(w http.ResponseWriter, r *http.Request) {
-	payload := types.Product{}
-	if err := utils.ParseJSON(r, &payload); err != nil {
-		utils.WriteError(
-			w,
-			http.StatusBadRequest,
-			err,
-		)
-		return
-	}
-	err := h.store.CreateProduct(payload)
-	if err != nil {
-		utils.WriteError(
-			w,
-			http.StatusBadRequest,
-			err,
-		)
-		return
-	}
-	utils.WriteJSON(
-		w,
-		http.StatusCreated,
-		map[string]string{
-			"message": "product created",
-		},
-	)
 }
 
 func (h *Handler) handleGetProducts(w http.ResponseWriter, r *http.Request) {
