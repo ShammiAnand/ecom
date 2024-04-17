@@ -2,6 +2,7 @@ package order
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/shammianand/ecom/types"
 )
@@ -14,6 +15,41 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{
 		db: db,
 	}
+}
+
+func scanRowsIntoOrders(rows *sql.Rows) (*types.Order, error) {
+	order := &types.Order{}
+	err := rows.Scan(
+		&order.ID,
+		&order.UserId,
+		&order.Total,
+		&order.Status,
+		&order.Address,
+		&order.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
+func (s *Store) GetOrders(userId int) ([]types.Order, error) {
+	query := fmt.Sprintf("SELECT * FROM orders WHERE userId=%d;", userId)
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	orders := []types.Order{}
+	for rows.Next() {
+		p, err := scanRowsIntoOrders(rows)
+		if err != nil {
+			return nil, err
+		}
+		orders = append(orders, *p)
+	}
+	return orders, nil
 }
 
 func (s *Store) CreateOrder(order types.Order) (int, error) {

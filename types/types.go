@@ -41,6 +41,7 @@ type UserStore interface {
 type OrderStore interface {
 	CreateOrder(Order) (int, error)
 	CreateOrderItem(OrderItem) (int, error)
+	GetOrders(int) ([]Order, error)
 }
 
 type OrderItem struct {

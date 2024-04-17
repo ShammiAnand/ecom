@@ -21,6 +21,38 @@ func NewHandler(store types.OrderStore, productStore types.ProductStore, userSto
 
 func (h *Handler) RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /cart/checkout", auth.WithJWTAuth(h.handleCartCheckout, h.userStore))
+	router.HandleFunc("GET /orders", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
+
+	// TODO
+	// router.HandleFunc("GET /cart", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
+	// router.HandleFunc("POST /cart", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
+}
+
+func (h *Handler) handleGetOrders(w http.ResponseWriter, r *http.Request) {
+	userId := auth.GetUserIdFromContext(r.Context())
+	_, err := h.userStore.GetUserByID(userId)
+	if err != nil {
+		utils.WriteError(
+			w,
+			http.StatusBadRequest,
+			err,
+		)
+		return
+	}
+	orders, err := h.store.GetOrders(userId)
+	if err != nil {
+		utils.WriteError(
+			w,
+			http.StatusBadRequest,
+			err,
+		)
+		return
+	}
+	utils.WriteJSON(
+		w,
+		http.StatusOK,
+		orders,
+	)
 }
 
 func (h *Handler) handleCartCheckout(w http.ResponseWriter, r *http.Request) {
