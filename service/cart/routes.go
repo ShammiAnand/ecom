@@ -23,10 +23,6 @@ func (h *Handler) RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /cart/checkout", auth.WithJWTAuth(h.handleCartCheckout, h.userStore))
 	router.HandleFunc("POST /cart/cancel", auth.WithJWTAuth(h.handleCartCancel, h.userStore))
 	router.HandleFunc("GET /orders", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
-
-	// TODO
-	// router.HandleFunc("GET /cart", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
-	// router.HandleFunc("POST /cart", auth.WithJWTAuth(h.handleGetOrders, h.userStore))
 }
 
 func (h *Handler) handleCartCancel(w http.ResponseWriter, r *http.Request) {
