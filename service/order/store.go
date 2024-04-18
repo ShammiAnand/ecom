@@ -52,6 +52,21 @@ func (s *Store) GetOrders(userId int) ([]types.Order, error) {
 	return orders, nil
 }
 
+func (s *Store) CancelOrder(orderId int) (bool, error) {
+	res, err := s.db.Exec(
+		"UPDATE orders SET status='cancelled' WHERE id=?",
+		orderId,
+	)
+	if err != nil {
+		return false, err
+	}
+	check, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return check > 0, nil
+}
+
 func (s *Store) CreateOrder(order types.Order) (int, error) {
 	res, err := s.db.Exec(
 		"INSERT INTO orders(userId, total, status, address) VALUES (?,?,?,?)",
