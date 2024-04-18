@@ -16,7 +16,7 @@ import (
 
 func CreateJWT(secret []byte, userID int) (string, error) {
 
-	expiration := time.Second * time.Duration(3600*24)
+	expiration := time.Second * time.Duration(30)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"userID":    strconv.Itoa(userID),
 		"expiredAt": time.Now().Add(expiration).Unix(),
@@ -47,9 +47,17 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 			permissionDenied(w)
 			return
 		}
-		// fetch user id
+
+		// fetch user id and expiration time
 		claims := token.Claims.(jwt.MapClaims)
 		userID, _ := strconv.Atoi(claims["userID"].(string))
+		expirationTime := int64(claims["expiredAt"].(float64))
+
+		if time.Now().Unix() > expirationTime {
+			log.Println("TOKEN EXPIRED")
+			permissionDenied(w)
+			return
+		}
 
 		// get user from user id
 		user, err := store.GetUserByID(userID)
